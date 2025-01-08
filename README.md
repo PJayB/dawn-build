@@ -1,7 +1,7 @@
 To build:
 ```
 git submodule update --init
-cmake -S . -B build -G Ninja
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 cmake --install build --prefix install
 ```
