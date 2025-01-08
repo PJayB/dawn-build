@@ -32,6 +32,7 @@ add_library(webgpu_precompiled SHARED)
 target_sources(webgpu_precompiled
     PUBLIC
         webgpu-cpp.cpp
+        exports.def
     PUBLIC FILE_SET HEADERS
     BASE_DIRS
         WebGPU-distribution/include
