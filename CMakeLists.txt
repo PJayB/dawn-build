@@ -1,10 +1,32 @@
 cmake_minimum_required(VERSION 3.23...3.24 FATAL_ERROR)
 project(webgpu-backend-dawn VERSION 1.0.0)
 
+#
+# Include Dawn
+#
+set(DAWN_BUILD_ANDROID_SAMPLES OFF)
+set(DAWN_BUILD_SAMPLES OFF)
+set(TINT_BUILD_TESTS OFF)
+set(TINT_BUILD_CMD_TOOLS OFF)
 set(DAWN_FETCH_DEPENDENCIES ON)
 set(DAWN_ENABLE_INSTALL OFF)
 set(CMAKE_BUILD_TYPE Release)
 
+add_subdirectory(WebGPU-distribution)
+
+# Ensure dllexport is enabled
+#target_compile_definitions(dawn_proc PRIVATE "WGPU_SHARED_LIBRARY")
+#target_compile_definitions(dawn_proc PRIVATE "WGPU_SHARED_LIBRARY")
+#target_compile_definitions(dawn_native PRIVATE "DAWN_NATIVE_SHARED_LIBRARY")
+target_compile_definitions(webgpu_dawn PRIVATE WGPU_IMPLEMENTATION WGPU_SHARED_LIBRARY)
+
+# Find Dawn headers
+set(DAWN_HEADER_PATH ${CMAKE_BINARY_DIR}/_deps/dawn-src/include)
+file(GLOB_RECURSE DAWN_HEADER_FILES
+    ${DAWN_HEADER_PATH}/*.h
+    ${DAWN_HEADER_PATH}/*.hpp)
+
+# Set final output DLL suffix
 # Some platforms define CMAKE_LIBRARY_ARCHITECTURE, some don't.
 if ("${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "")
     if ("${CMAKE_SYSTEM_NAME}" STREQUAL "")
@@ -21,13 +43,7 @@ string(TOLOWER "${ARCH_SUFFIX}" ARCH_SUFFIX)
 
 set(COMPILED_DLL_SUFFIX "${ARCH_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE STRING "The filename suffix for compiled DLLs")
 
-add_subdirectory(WebGPU-distribution)
-
-set(DAWN_HEADER_PATH ${CMAKE_BINARY_DIR}/_deps/dawn-src/include)
-file(GLOB_RECURSE DAWN_HEADER_FILES
-    ${DAWN_HEADER_PATH}/*.h
-    ${DAWN_HEADER_PATH}/*.hpp)
-
+# Output DLL
 add_library(webgpu_precompiled SHARED)
 target_sources(webgpu_precompiled
     PUBLIC
