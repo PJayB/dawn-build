@@ -10,7 +10,6 @@ set(TINT_BUILD_TESTS OFF)
 set(TINT_BUILD_CMD_TOOLS OFF)
 set(DAWN_FETCH_DEPENDENCIES ON)
 set(DAWN_ENABLE_INSTALL OFF)
-set(CMAKE_BUILD_TYPE Release)
 
 add_subdirectory(WebGPU-distribution)
 
