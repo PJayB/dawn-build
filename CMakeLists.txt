@@ -80,10 +80,6 @@ target_link_libraries(webgpu_precompiled PUBLIC webgpu)
 if (WIN32)
     set_target_properties(webgpu_precompiled PROPERTIES
         WINDOWS_EXPORT_ALL_SYMBOLS ON)
-elseif (LINUX)
-    set_target_properties(webgpu_precompiled PROPERTIES LINKER_LANGUAGE C)
-    set_target_properties(webgpu_precompiled PROPERTIES SHARED_LINKER_FLAGS
-        "-Wl,--version-script=ld-exports.map")
 endif()
 
 install(TARGETS webgpu_precompiled FILE_SET HEADERS)
