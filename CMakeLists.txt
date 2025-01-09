@@ -21,9 +21,12 @@ target_compile_definitions(webgpu_dawn PRIVATE WGPU_IMPLEMENTATION WGPU_SHARED_L
 
 # Find Dawn headers
 set(DAWN_HEADER_PATH ${CMAKE_BINARY_DIR}/_deps/dawn-src/include)
+set(DAWN_GEN_HEADER_PATH ${CMAKE_BINARY_DIR}/_deps/dawn-build/gen/include)
 file(GLOB_RECURSE DAWN_HEADER_FILES
     ${DAWN_HEADER_PATH}/*.h
-    ${DAWN_HEADER_PATH}/*.hpp)
+    ${DAWN_HEADER_PATH}/*.hpp
+    ${DAWN_GEN_HEADER_PATH}/*.h
+    ${DAWN_GEN_HEADER_PATH}/*.hpp)
 
 # Set final output DLL suffix
 # Some platforms define CMAKE_LIBRARY_ARCHITECTURE, some don't.
