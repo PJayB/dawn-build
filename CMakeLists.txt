@@ -57,13 +57,13 @@ set(COMPILED_DLL_SUFFIX "${ARCH_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE STR
 # Output DLL
 add_library(webgpu_precompiled SHARED)
 target_sources(webgpu_precompiled
-    PUBLIC
-        webgpu-cpp.cpp
-        exports.def
+    PRIVATE
+        webgpu-cpp.cpp # Cpp file forces declspec(dllexport)
     PUBLIC FILE_SET HEADERS
     BASE_DIRS
         WebGPU-distribution/include
         ${DAWN_HEADER_PATH}
+        ${DAWN_GEN_HEADER_PATH}
     FILES
         WebGPU-distribution/include/webgpu/webgpu.hpp
         ${DAWN_HEADER_FILES}
@@ -71,7 +71,19 @@ target_sources(webgpu_precompiled
 set_target_properties(webgpu_precompiled PROPERTIES
     OUTPUT_NAME "webgpu-cpp"
     SUFFIX "${COMPILED_DLL_SUFFIX}"
-    WINDOWS_EXPORT_ALL_SYMBOLS ON)
+)
 target_link_libraries(webgpu_precompiled PUBLIC webgpu)
+
+#
+# Set up export properties for each platform
+#
+if (WIN32)
+    set_target_properties(webgpu_precompiled PROPERTIES
+        WINDOWS_EXPORT_ALL_SYMBOLS ON)
+elseif (LINUX)
+    set_target_properties(webgpu_precompiled PROPERTIES LINKER_LANGUAGE C)
+    set_target_properties(webgpu_precompiled PROPERTIES SHARED_LINKER_FLAGS
+        "-Wl,--version-script=ld-exports.map")
+endif()
 
 install(TARGETS webgpu_precompiled FILE_SET HEADERS)
