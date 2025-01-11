@@ -4,9 +4,10 @@ This repo provides a utility script to create `libwebgpu_dawn.so` or
 `webgpu_dawn.dll` for use with projects. There are important differences between
 the way this library is produced versus stock Dawn:
 
-* The version of Dawn is locked to `chromium/6536`, in order to exactly match
-  with Elie Michel's fanstastic
+* This provides `webgpu.hpp` from Elie Michel's fanstastic
   [WebGPU-Cpp](https://github.com/eliemichel/WebGPU-Cpp) library.
+* The version of Dawn is locked to `chromium/6536`, in order to exactly match
+  with WebGPU-Cpp.
 * This only produces a single, shared library. By default, Dawn will output all
   its dependent libraries as either static or shared, and thus, distributing a
   single dynamic library with your application would be impossible.
