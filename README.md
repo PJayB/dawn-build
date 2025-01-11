@@ -1,8 +1,8 @@
 # Precompiled Dawn Builds
 
-This repo provides a utility script to create `libwebgpu_dawn.so` or
-`webgpu_dawn.dll` for use with projects. There are important differences between
-the way this library is produced versus stock Dawn:
+This repo provides utilities for building `libwebgpu_dawn.so` or
+`webgpu_dawn.lib/dll`. There are important differences between the way this
+library is produced versus stock Dawn:
 
 * This provides `webgpu.hpp` from Elie Michel's fanstastic
   [WebGPU-Cpp](https://github.com/eliemichel/WebGPU-Cpp) library.
@@ -27,6 +27,7 @@ detected, but can be overriden with these cache variables if needed:
 ```
 PRECOMPILED_DAWN_SYSTEM_NAME
 PRECOMPILED_DAWN_SYSTEM_PROCESSOR
+PRECOMPILED_DAWN_TARGET_TRIPLE
 PRECOMPILED_DAWN_RUNTIME_LIBRARY
 ```
 
