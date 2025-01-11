@@ -1,0 +1,9 @@
+deb [arch=i386,amd64] http://archive.ubuntu.com/ubuntu/ jammy main restricted
+deb [arch=i386,amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates main restricted
+deb [arch=i386,amd64] http://archive.ubuntu.com/ubuntu/ jammy universe
+deb [arch=i386,amd64] http://archive.ubuntu.com/ubuntu/ jammy-updates universe
+
+deb [arch=arm64] http://ports.ubuntu.com/ jammy main restricted
+deb [arch=arm64] http://ports.ubuntu.com/ jammy-updates main restricted
+deb [arch=arm64] http://ports.ubuntu.com/ jammy universe
+deb [arch=arm64] http://ports.ubuntu.com/ jammy-updates universe
