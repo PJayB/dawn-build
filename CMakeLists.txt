@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.23...3.24 FATAL_ERROR)
-project(webgpu-backend-dawn VERSION 1.0.0)
+project(webgpu-precompiled-dawn VERSION 1.0.0)
 
 #
 # Set up C++ environment
@@ -19,14 +19,10 @@ set(TINT_BUILD_TESTS OFF)
 set(TINT_BUILD_CMD_TOOLS OFF)
 set(DAWN_FETCH_DEPENDENCIES ON)
 set(DAWN_ENABLE_INSTALL OFF)
+set(DAWN_ENABLE_PIC ON)
+set(BUILD_SHARED_LIBS OFF)
 
 add_subdirectory(WebGPU-distribution)
-
-# Ensure dllexport is enabled
-#target_compile_definitions(dawn_proc PRIVATE "WGPU_SHARED_LIBRARY")
-#target_compile_definitions(dawn_proc PRIVATE "WGPU_SHARED_LIBRARY")
-#target_compile_definitions(dawn_native PRIVATE "DAWN_NATIVE_SHARED_LIBRARY")
-target_compile_definitions(webgpu_dawn PRIVATE WGPU_IMPLEMENTATION WGPU_SHARED_LIBRARY)
 
 # Find Dawn headers
 set(DAWN_HEADER_PATH ${CMAKE_BINARY_DIR}/_deps/dawn-src/include)
@@ -37,22 +33,13 @@ file(GLOB_RECURSE DAWN_HEADER_FILES
     ${DAWN_GEN_HEADER_PATH}/*.h
     ${DAWN_GEN_HEADER_PATH}/*.hpp)
 
-# Set final output DLL suffix
-# Some platforms define CMAKE_LIBRARY_ARCHITECTURE, some don't.
-if ("${CMAKE_LIBRARY_ARCHITECTURE}" STREQUAL "")
-    if ("${CMAKE_SYSTEM_NAME}" STREQUAL "")
-        message(FATAL_ERROR "CMAKE_SYSTEM_NAME is null")
-    endif()
-    if ("${CMAKE_HOST_SYSTEM_PROCESSOR}" STREQUAL "")
-        message(FATAL_ERROR "CMAKE_HOST_SYSTEM_PROCESSOR is null")
-    endif()
-    set(ARCH_SUFFIX "-${CMAKE_HOST_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}")
-else()
-    set(ARCH_SUFFIX "-${CMAKE_LIBRARY_ARCHITECTURE}")
-endif()
-string(TOLOWER "${ARCH_SUFFIX}" ARCH_SUFFIX)
+# Import our paths
+include(FindPrecompiledDawn.cmake)
 
-set(COMPILED_DLL_SUFFIX "${ARCH_SUFFIX}${CMAKE_SHARED_LIBRARY_SUFFIX}" CACHE STRING "The filename suffix for compiled DLLs")
+# Output paths
+set(CMAKE_INSTALL_LIBDIR "${PRECOMPILED_DAWN_LIBDIR_BASE}")
+set(CMAKE_INSTALL_BINDIR "${PRECOMPILED_DAWN_BINDIR_BASE}")
+set(CMAKE_INSTALL_INCLUDEDIR "${PRECOMPILED_DAWN_INCLUDEDIR_BASE}")
 
 # Output DLL
 add_library(webgpu_precompiled SHARED)
@@ -69,17 +56,45 @@ target_sources(webgpu_precompiled
         ${DAWN_HEADER_FILES}
 )
 set_target_properties(webgpu_precompiled PROPERTIES
-    OUTPUT_NAME "webgpu-cpp"
-    SUFFIX "${COMPILED_DLL_SUFFIX}"
+    OUTPUT_NAME "${PRECOMPILED_DAWN_LIBRARY_NAME}"
 )
-target_link_libraries(webgpu_precompiled PUBLIC webgpu)
+
+# Steal the webgpu_dawn target's properties and source files
+get_target_property(WEBGPU_DAWN_SOURCES webgpu_dawn SOURCES)
+get_target_property(WEBGPU_DAWN_COMPILE_OPTIONS webgpu_dawn COMPILE_OPTIONS)
+get_target_property(WEBGPU_DAWN_LINK_OPTIONS webgpu_dawn LINK_OPTIONS)
+get_target_property(WEBGPU_DAWN_LINK_LIBRARIES webgpu_dawn LINK_LIBRARIES)
+target_sources(webgpu_precompiled PRIVATE
+    ${WEBGPU_DAWN_SOURCES})
+if (WEBGPU_DAWN_COMPILE_OPTIONS)
+    target_compile_options(webgpu_precompiled PUBLIC
+        ${WEBGPU_DAWN_COMPILE_OPTIONS}
+    )
+endif()
+if (WEBGPU_DAWN_LINK_OPTIONS)
+    target_link_options(webgpu_precompiled PUBLIC
+        ${WEBGPU_DAWN_LINK_OPTIONS}
+    )
+endif()
+target_link_libraries(webgpu_precompiled PUBLIC
+    ${WEBGPU_DAWN_LINK_LIBRARIES}
+)
+target_compile_definitions(webgpu_precompiled PRIVATE
+    "WGPU_IMPLEMENTATION"
+    "WGPU_SHARED_LIBRARY")
 
 #
 # Set up export properties for each platform
 #
 if (WIN32)
     set_target_properties(webgpu_precompiled PROPERTIES
-        WINDOWS_EXPORT_ALL_SYMBOLS ON)
+        WINDOWS_EXPORT_ALL_SYMBOLS ON
+    )
 endif()
 
-install(TARGETS webgpu_precompiled FILE_SET HEADERS)
+install(TARGETS webgpu_precompiled
+    FILE_SET HEADERS
+)
+
+# Install the cmake file
+install(FILES FindPrecompiledDawn.cmake DESTINATION ".")
